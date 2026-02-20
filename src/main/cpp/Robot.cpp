@@ -13,10 +13,17 @@ Robot::Robot() {
   pitchDirection = 1;
   referenceYaw = 90;
   referencePitch = 90;
+
+//  auto nt_inst = nt::NetworkTableInstance::GetDefault();
+//  auto nt_table = nt_inst.GetTable("SmartDashboard");
+//  nte_camera_location = nt_table->GetEntry("OakDLite/Object[0]/Location");
+//  camera_location_sub = nt_table->GetDoubleTopic("OakDLite/Object[0]/Location").Subscribe(locationObj[0, 1]);
 }
 
 
 void Robot::RobotPeriodic() {
+  //std::cout << "Test: " << locationObj[0] << ", " << locationObj[1] << std::endl;
+#if 0
   bool targetVisible = false;
   double targetYaw = 0.0;
   double targetPitch = 0.0;
@@ -93,17 +100,50 @@ void Robot::RobotPeriodic() {
         }
       }
 
-      
       if(counter >= counterMax) {
         counter = counterMax; 
         referencePitch = 90;
       }
-//      std::cout << referenceYaw << std::endl;
+     std::cout << referenceYaw << std::endl;
     } else {
       counter++;
     }
   }
+#endif
+
+  // Step 1: Get List of Fuel
+  //std::cout << "Step 1" << std::endl;
+  m_listOfFuel.clear();
+  for (int i = 0; i < MAX_NUM_OBJECTS; i++) {
+    if (m_OakDLiteCameraSensor.ObjectIsFuel(i) && m_OakDLiteCameraSensor.ObjectIsTracked(i))
+    {
+      m_listOfFuel.push_back(i);
+      //std::cout << "Object added" << std::endl;
+    }
+  }
+
+  // Step 2: (TODO) eleminate any Fuel too close to robots
+
+  // Step 3: Determine Closest Fuel and update class value
+  if (m_listOfFuel.size() > 0) {
+    double minDistanceFromRobot = 100000000.0;
+    for (int i = 0; i < (int)m_listOfFuel.size(); i++) {
+      if (m_OakDLiteCameraSensor.GetDistanceFromRobot(i) < minDistanceFromRobot) {
+        minDistanceFromRobot = m_OakDLiteCameraSensor.GetDistanceFromRobot(i);
+        //m_translationArr = nte_location[i].GetDoubleArray(std::vector<double>());
+
+        m_bestFuelId = i;
+      }
+    }
+    // return the good note
+    std::cout << "FuelID: " << m_bestFuelId << " ,Distance:" << minDistanceFromRobot << std::endl;
+//    return m_bestFuelId;
+  }
+  // If no Notes, return -1
+//  else
+//    return -1;
 }
+
 
 
 void Robot::AutonomousInit() {

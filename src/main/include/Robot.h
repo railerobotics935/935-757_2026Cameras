@@ -6,7 +6,15 @@
 #include <photon/PhotonCamera.h>
 #include <frc/Servo.h>
 #include <frc/controller/PIDController.h>
+#include <networktables/NetworkTableEntry.h>
+#include <networktables/NetworkTableInstance.h>
+#include <networktables/DoubleTopic.h>
+#include <wpi/print.h>
+#include <iostream>
+#include <vector>
+
 #include "constants.h"
+#include "OakDLiteSensor.h"
 
 using namespace CameraConstants;
 
@@ -26,6 +34,9 @@ class Robot : public frc::TimedRobot {
   void SimulationPeriodic() override;
 
  private:
+  nt::NetworkTableEntry nte_camera_location;
+  nt::DoubleSubscriber camera_location_sub;
+  std::vector<double> locationObj = {0.0, 0.0, 0.0};
   // 2. ADD THIS LINE HERE
   frc::PIDController m_yawPIDController {kYawP,kYawI,kYawD};
   frc::PIDController m_pitchPIDController {kPitchP,kPitchI,kPitchD};
@@ -39,10 +50,17 @@ class Robot : public frc::TimedRobot {
   double referencePitch;
   int counter;
 
-
-
   frc::SendableChooser<std::string> m_chooser;
   const std::string kAutoNameDefault = "Default";
   const std::string kAutoNameCustom = "My Auto";
   std::string m_autoSelected;
+
+  // Object recognition camera
+//  OakDLiteSensor m_OakDLiteCameraSensor{"OakDLiteCam", CameraConstants::OakDLiteCamera::kPose3d, &m_poseEstimator};
+  OakDLiteSensor m_OakDLiteCameraSensor{"OakDLite", CameraConstants::OakDLiteCamera::kPose3d};
+
+  // Processing variables for the 
+  int m_bestFuelId;
+  std::vector<int> m_listOfFuel;
+  std::vector<double> m_translationArr;
 };
