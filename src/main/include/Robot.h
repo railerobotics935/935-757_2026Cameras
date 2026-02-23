@@ -49,6 +49,7 @@ class Robot : public frc::TimedRobot {
   double referenceYaw;
   double referencePitch;
   int counter;
+  //double minDistanceFromRobot;
 
   frc::SendableChooser<std::string> m_chooser;
   const std::string kAutoNameDefault = "Default";

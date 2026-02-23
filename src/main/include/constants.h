@@ -4,9 +4,9 @@
 
 namespace CameraConstants {
 
-constexpr double kYawP = 0.1;
+constexpr double kYawP = 0.05;
 constexpr double kYawI = 0.0;
-constexpr double kYawD = 0.0;
+constexpr double kYawD = 0.01;
 
 constexpr double kPitchP = 0.3;
 constexpr double kPitchI = 0.0;
@@ -32,9 +32,10 @@ double GetStandardDeviationFromDistance(double distance);
 // Pose3d/transformation2d of the camera relative to the robot
 // X if forward, Y is Left, Z is up 
 namespace FrontCamera {
-    const frc::Translation3d kTranlation3d{(units::meter_t)0.250, (units::meter_t)-0.185, (units::meter_t)0.2286};
+    const frc::Translation3d kTranlation3d{(units::meter_t)0.250, (units::meter_t)0.0, (units::meter_t)0.2286};
     const frc::Rotation3d kRotation3d{(units::radian_t)0.0, (units::radian_t)std::numbers::pi / 12, (units::radian_t)0.0};
     const frc::Pose3d kPose3d{kTranlation3d, kRotation3d};
+    
 } // namespace FrontCamera
 
 namespace BackLeftCamera {

@@ -13,6 +13,8 @@ Robot::Robot() {
   pitchDirection = 1;
   referenceYaw = 90;
   referencePitch = 90;
+  //minDistanceFromRobot = 100000000.0;
+
 
 //  auto nt_inst = nt::NetworkTableInstance::GetDefault();
 //  auto nt_table = nt_inst.GetTable("SmartDashboard");
@@ -23,10 +25,10 @@ Robot::Robot() {
 
 void Robot::RobotPeriodic() {
   //std::cout << "Test: " << locationObj[0] << ", " << locationObj[1] << std::endl;
-#if 0
   bool targetVisible = false;
   double targetYaw = 0.0;
   double targetPitch = 0.0;
+#if 0  
   auto results = camera.GetAllUnreadResults();
   if (results.size() > 0) {
     // Camera processed a new frame since last
@@ -127,21 +129,45 @@ void Robot::RobotPeriodic() {
   // Step 3: Determine Closest Fuel and update class value
   if (m_listOfFuel.size() > 0) {
     double minDistanceFromRobot = 100000000.0;
+    double yaw = 0.0;
+    double pitch = 0.0;
+    m_bestFuelId = 0;
     for (int i = 0; i < (int)m_listOfFuel.size(); i++) {
-      if (m_OakDLiteCameraSensor.GetDistanceFromRobot(i) < minDistanceFromRobot) {
-        minDistanceFromRobot = m_OakDLiteCameraSensor.GetDistanceFromRobot(i);
-        //m_translationArr = nte_location[i].GetDoubleArray(std::vector<double>());
-
-        m_bestFuelId = i;
+      if ((m_OakDLiteCameraSensor.GetDistanceFromRobot(m_listOfFuel[i]) < minDistanceFromRobot) &&
+          (m_OakDLiteCameraSensor.GetDistanceFromRobot(m_listOfFuel[i]) > 100.0))
+      {
+        minDistanceFromRobot = m_OakDLiteCameraSensor.GetDistanceFromRobot(m_listOfFuel[i]);
+        m_OakDLiteCameraSensor.GetYawPitchAngleFromRobot(m_listOfFuel[i], &yaw, &pitch);
+        m_bestFuelId = m_listOfFuel[i];
       }
     }
     // return the good note
-    std::cout << "FuelID: " << m_bestFuelId << " ,Distance:" << minDistanceFromRobot << std::endl;
-//    return m_bestFuelId;
+//    std::cout << "FuelID: " << m_bestFuelId << " , Distance: " << minDistanceFromRobot << std::endl;
+
+    std::cout << m_bestFuelId << " Yaw: " << yaw << " Pitch: " << pitch << std::endl;
+    
+    double pidYawOutput = m_yawPIDController.Calculate(-yaw, 0.0);
+    double pidPitchOutput = m_pitchPIDController.Calculate(pitch, 0.0);
+
+    std::cout << "Min Distance: " << minDistanceFromRobot << std::endl;
+    //std::cout << "PID Yaw: " << pidYawOutput << " PID Pitch: " << pidPitchOutput << std::endl;
+
+    if ((pidYawOutput + referenceYaw) > 135) {
+      referenceYaw = 135;
+    }
+    else if ((pidYawOutput + referenceYaw) < 45)
+      referenceYaw = 45;
+    else
+      referenceYaw = referenceYaw + pidYawOutput;
+
+    if ((pidPitchOutput + referencePitch) > 120) {
+      referencePitch = 120;
+    }
+    else if ((pidPitchOutput + referencePitch) < 80)
+      referencePitch = 80;
+    else
+      referencePitch = referencePitch + pidPitchOutput;
   }
-  // If no Notes, return -1
-//  else
-//    return -1;
 }
 
 
@@ -170,7 +196,7 @@ void Robot::AutonomousPeriodic() {
 void Robot::TeleopInit() {}
 
 void Robot::TeleopPeriodic() {
-  
+#if 0  
   auto result = camera.GetLatestResult();
 
   if (result.HasTargets()) {
@@ -178,10 +204,10 @@ void Robot::TeleopPeriodic() {
     
     double yaw = target.GetYaw();
     double pitch = target.GetPitch();
-
 //    frc::SmartDashboard::PutNumber("Vision/Yaw", yaw);
 //    frc::SmartDashboard::PutNumber("Vision/Pitch", pitch);
   }
+#endif
 }
 
 void Robot::DisabledInit() {}
@@ -189,13 +215,11 @@ void Robot::DisabledInit() {}
 void Robot::DisabledPeriodic() {}
 
 void Robot::TestInit() {
-  referenceYaw = 90;
 }
 
 void Robot::TestPeriodic() {
-        yawServo.SetAngle(referenceYaw);
-        pitchServo.SetAngle(referencePitch);
-
+  yawServo.SetAngle(referenceYaw);
+  //pitchServo.SetAngle(referencePitch);
 }
 
 void Robot::SimulationInit() {}

@@ -67,10 +67,40 @@ double OakDLiteSensor::GetDistanceFromRobot(int object) {
  m_translationArr = nte_location[object].GetDoubleArray(std::vector<double>());
  return std::sqrt(std::pow((double)m_translationArr[0], 2) + std::pow((double)m_translationArr[1], 2));
 }
+//
+//double OakDLiteSensor::GetXFromRobot(int object) {
+////  return std::sqrt(std::pow((double)GetRobotRelativeTranslation(object).X(), 2) + std::pow((double)GetRobotRelativeTranslation(object).Y(), 2));
+// // Grab Translation3d values in an vector
+// m_translationArr = nte_location[object].GetDoubleArray(std::vector<double>());
+// return (double)m_translationArr[0];
+//}
+//
+//double OakDLiteSensor::GetYFromRobot(int object) {
+////  return std::sqrt(std::pow((double)GetRobotRelativeTranslation(object).X(), 2) + std::pow((double)GetRobotRelativeTranslation(object).Y(), 2));
+// // Grab Translation3d values in an vector
+// m_translationArr = nte_location[object].GetDoubleArray(std::vector<double>());
+// return (double)m_translationArr[1];
+//}
+
+void OakDLiteSensor::GetYawPitchAngleFromRobot(int object, double *yaw, double *pitch) {
+
+  *yaw = 0.0;
+  *pitch = 0.0;
+
+  m_translationArr = nte_location[object].GetDoubleArray(std::vector<double>());
+
+  // calculate Yaw angle in degrees
+  if (m_translationArr[2] != 0.0)
+    *yaw = (double)(atan((double)m_translationArr[0]/(double)m_translationArr[2])) * (180 / std::numbers::pi);
+
+  // calculate Pitch angle in degrees
+  if (m_translationArr[2] != 0.0)
+    *pitch = (double)(atan((double)m_translationArr[1]/(double)m_translationArr[2])) * (180 / std::numbers::pi);
+}
 
 bool OakDLiteSensor::ObjectIsTracked(int object) {
   // If object is tracked, return true, else return false
-  if (nte_status[object].GetString("default") == "TRACKED")
+  if (nte_status[object].GetString("void") == "TRACKED")
     return true;
   else
     return false;
@@ -78,7 +108,7 @@ bool OakDLiteSensor::ObjectIsTracked(int object) {
 
 bool OakDLiteSensor::ObjectIsFuel(int object) {
   // If object is Fuel, return true, else return false
-  if (nte_type[object].GetString("default") == "fuel")
+  if (nte_type[object].GetString("void") == "fuel")
     return true;
   else
     return false;

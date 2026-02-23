@@ -6,10 +6,11 @@
 #include <frc/geometry/Pose3d.h>
 #include <frc/geometry/Transform2d.h>
 #include <frc/estimator/SwerveDrivePoseEstimator.h>
+#include <cmath>
 
 #include <string.h>
 
-#define MAX_NUM_OBJECTS 5
+#define MAX_NUM_OBJECTS 20
 
 class OakDLiteSensor {
 public:
@@ -48,7 +49,12 @@ public:
    * @return The distance in Meters the object is from the center fo the robot
   */
   double GetDistanceFromRobot(int object);
-  
+
+  /**
+   * @return The Yaw and Pitch of the object
+  */
+  void GetYawPitchAngleFromRobot(int object, double *yaw, double *pitch);
+
   /**
    * @return True if the object is tracked
   */
